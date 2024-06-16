@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  username String @unique
+  password String
+
+  tweets    Tweet[]
+  likes     Like[]
+  replies   Reply[]
+  followers Follower[] @relation("UserFollowers")
+  following Follower[] @relation("UserFollowing")
+}
+
+model Tweet {
+  id      Int       @id @default(autoincrement())
+  content String
+  type    TweetType
+  userId  Int
+  user    User      @relation(fields: [userId], references: [id])
+  replies Reply[]
+  likes   Like[]
+}
+
+model Like {
+  userId  Int
+  tweetId Int
+  user    User  @relation(fields: [userId], references: [id])
+  tweet   Tweet @relation(fields: [tweetId], references: [id])
+
+  @@id([userId, tweetId])
+}
+
+model Reply {
+  tweetId Int
+  userId  Int
+  tweet   Tweet @relation(fields: [tweetId], references: [id])
+  user    User  @relation(fields: [userId], references: [id])
+
+  @@id([tweetId, userId])
+}
+
+model Follower {
+  userId     Int
+  followerId Int
+  user       User @relation("UserFollowers", fields: [userId], references: [id])
+  follower   User @relation("UserFollowing", fields: [followerId], references: [id])
+
+  @@id([userId, followerId])
+}
+
+enum TweetType {
+  TWEET
+  REPLY
+}

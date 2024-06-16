@@ -1,13 +1,18 @@
 import { log } from "console";
 import express from "express";
+import cors from "cors";
 
 const app = express();
 
-//// Middleware para analisar JSON no corpo da solicitação
 app.use(express.json());
+app.use(cors());
 
+// definição das rotas
 app.get("/", (req, res) => {
-	res.send("Testando 2");
+	res.status(200).json({
+		message: "Testando",
+		ok: true,
+	});
 });
 
 app.listen(3000, () => {
