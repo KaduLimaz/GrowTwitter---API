@@ -1,6 +1,7 @@
-import { log } from "console";
+
 import express from "express";
 import cors from "cors";
+import 'dotenv/config'
 
 const app = express();
 
@@ -15,6 +16,6 @@ app.get("/", (req, res) => {
 	});
 });
 
-app.listen(3000, () => {
-	console.log("server rodando em localhost:3000");
+app.listen(process.env.PORT, () => {
+	console.log(`server rodando em localhost:${process.env.PORT}`);
 });
