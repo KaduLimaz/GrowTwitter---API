@@ -106,3 +106,5 @@ export class TweetController {
 		}
     }
 }
+
+export default new TweetController();
