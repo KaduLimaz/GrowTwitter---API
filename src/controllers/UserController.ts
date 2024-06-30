@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { prismaConnection } from "../database/prisma.connection";
 
-export class UsersController {
-	public static async create(req: Request, res: Response) {
+export class UserController {
+	async createUser(req: Request, res: Response) {
 
 		const { name, email, username, password, authToken } = req.body;
 
@@ -31,6 +31,20 @@ export class UsersController {
 			});
 		}
 	}
+
+	async getUsers(req: Request, res: Response) {
+		try {
+		  const users = await prismaConnection.user.findMany();
+		  res.status(200).json(users);
+		} catch (err) {
+			return res.status(500).json({
+				ok: false,
+				message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
+					(err as Error).message
+				}`,
+			});
+		}
+	  }
 
 
 	async getUserById(req: Request, res: Response) {
@@ -108,3 +122,5 @@ export class UsersController {
 	  }
 
 }
+
+export default new UserController();
