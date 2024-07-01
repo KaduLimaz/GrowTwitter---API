@@ -5,30 +5,17 @@ import { CreateUserType } from "../types/users.type";
 
 const userService = new UserService();
 
-export class UserController {
-	async list(req: Request, res: Response) {
-		try {
-			const users = await userService.findAll();
-			return res.status(200).json(users);
-		} catch (err) {
-			return res.status(500).json({
-				ok: false,
-				message: `Erro ao listar usuarios. Erro: ${(err as Error).name} - ${
-					(err as Error).message
-				}`,
-			});
-		}
-	}
+export class UserController {	
 
 	async createUser(req: Request, res: Response) {
 		try {
-			const { name, email, username, password, authToken } = req.body;
+			const { name, email, username, password } = req.body;
 
 			if (!name || !email || !password || !username) {
 				return res.status(400).json({
 					success: false,
 					code: 400,
-					message: "Preencha todos os campos obrigatórios.",
+					message: "Preencha todos os campos obrigatórios para criar conta.",
 				});
 			}
 
@@ -47,12 +34,12 @@ export class UserController {
 
 	async getUsers(req: Request, res: Response) {
 		try {
-			const users = await prismaConnection.user.findMany();
-			res.status(200).json(users);
+			const users = await userService.findAll();
+			return res.status(200).json(users);
 		} catch (err) {
 			return res.status(500).json({
 				ok: false,
-				message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
+				message: `Erro ao listar usuarios. Erro: ${(err as Error).name} - ${
 					(err as Error).message
 				}`,
 			});
@@ -101,7 +88,9 @@ export class UserController {
 	async deleteUser(req: Request, res: Response) {
 		try {
 			const { id } = req.params;
+
 			const sucess = await userService.deleteUser(id);
+			res.status(200).json(sucess)
 		} catch (err) {
 			return res.status(500).json({
 				ok: false,

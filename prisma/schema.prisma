@@ -8,74 +8,84 @@ datasource db {
 }
 
 enum TweetType {
-  Tweet
-  Retweet
+  TWEET
+  RETWEET
 }
 
 model User {
-  id            String     @id @default(uuid()) @db.Uuid
-  name          String     @db.VarChar(100)
-  email         String     @unique @db.VarChar(80)
-  username      String     @unique @db.VarChar(15)
-  password      String     @db.VarChar(100)
-  authToken     String?    @map("auth_token") @db.Text
-  createdAt     DateTime   @default(now()) @map("criado_em") @db.Timestamp()
-  updatedAt     DateTime   @updatedAt @map("atualizado_em") @db.Timestamp()
-  tweets        Tweet[]
-  following     Follower[] @relation("following")
-  followers     Follower[] @relation("followers")
-  likedUsername Like?
-  owner         Reply[]    @relation("UserOwner")
-  usernameReply Reply[]    @relation("UserUsernameReply")
+  id       String @id @default(uuid()) @db.Uuid
+  name     String @db.VarChar(100)
+  email    String @unique @db.VarChar(80)
+  username String @unique @db.VarChar(15)
+  password String @db.VarChar(100)
 
-  @@map("usuarios")
+  tweets    Tweet[]
+  following Follower[] @relation("following")
+  followers Follower[] @relation("followers")
+  likes     Like[]
+  retweets  Retweet[]
+  replies   Reply[]
+
+  createdAt DateTime @default(now()) @map("criado_em") @db.Timestamp()
+  updatedAt DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
+
+  @@map("users")
 }
 
 model Tweet {
-  id         String    @id @default(uuid()) @db.Uuid
-  content    String    @db.VarChar(200)
-  type       TweetType @map("tweet_type")
-  userId     String    @map("id_usuario") @db.Uuid
-  user       User      @relation(fields: [userId], references: [id])
-  createdAt  DateTime  @default(now()) @map("criado_em") @db.Timestamp()
-  updatedAt  DateTime  @updatedAt @map("atualizado_em") @db.Timestamp()
-  likes      Like[]
-  tweets     ReTweet[] @relation("tweet")
-  reTweets   ReTweet[] @relation("re_tweet")
-  tweetReply Reply[]   @relation("id_tweet")
+  id        String    @id @default(uuid()) @db.Uuid
+  content   String    @db.VarChar(200)
+  type      TweetType @map("tweet_type")
+  userId    String    @map("id_usuario") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+
+  likes     Like[]
+  retweets  Retweet[]
+  replies   Reply[]
+
+  createdAt DateTime @default(now()) @map("criado_em") @db.Timestamp()
+  updatedAt DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
 
   @@map("tweets")
 }
 
 model Like {
-  id           String   @id @default(uuid()) @db.Uuid
-  usernameUser String   @unique @db.VarChar(15)
-  username     User     @relation(fields: [usernameUser], references: [username])
-  tweetId      String   @unique @map("id_tweet") @db.Uuid
-  tweet        Tweet    @relation(fields: [tweetId], references: [id])
-  createdAt    DateTime @default(now()) @map("criado_em") @db.Timestamp()
-  updatedAt    DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tweetId   String   @map("tweet_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  tweet     Tweet    @relation(fields: [tweetId], references: [id])
 
-  @@map("like")
-}
-
-model ReTweet {
-  tweetId   String   @unique @map("id_tweet") @db.Uuid
-  tweet     Tweet    @relation("tweet", fields: [tweetId], references: [id])
-  reTweetId String   @unique @map("id_retweet") @db.Uuid
-  reTweet   Tweet    @relation("re_tweet", fields: [reTweetId], references: [id])
   createdAt DateTime @default(now()) @map("criado_em") @db.Timestamp()
   updatedAt DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
 
+  @@unique([userId, tweetId])
+  @@map("likes")
+}
+
+model Retweet {
+  id        String @id @default(uuid()) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  tweetId   String @map("tweet_id") @db.Uuid
+  content   String    @db.VarChar(200)
+  
+  user      User   @relation(fields: [userId], references: [id])
+  tweet     Tweet  @relation(fields: [tweetId], references: [id])
+
+  createdAt DateTime @default(now()) @map("criado_em") @db.Timestamp()
+  updatedAt DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
+
+  @@unique([userId, tweetId])
   @@map("retweets")
 }
 
 model Follower {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @map("id_usuario") @db.Uuid
-  user       User     @relation("followers", fields: [userId], references: [id])
   followerId String   @map("id_seguidor") @db.Uuid
+  user       User     @relation("followers", fields: [userId], references: [id])
   follower   User     @relation("following", fields: [followerId], references: [id])
+
   createdAt  DateTime @default(now()) @map("criado_em") @db.Timestamp()
   updatedAt  DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
 
@@ -86,14 +96,13 @@ model Follower {
 model Reply {
   id            String   @id @default(uuid()) @db.Uuid
   userId        String   @map("id_usuario") @db.Uuid
-  user          User     @relation("UserOwner", fields: [userId], references: [id])
-  username      String   @db.VarChar(15)
-  usernameReply User     @relation("UserUsernameReply", fields: [username], references: [username])
-  message       String   @db.VarChar(250)
   tweetId       String   @map("id_tweet") @db.Uuid
-  tweetReply    Tweet    @relation("id_tweet", fields: [tweetId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
+  tweet         Tweet    @relation(fields: [tweetId], references: [id])
+  message       String   @db.VarChar(250)
+
   createdAt     DateTime @default(now()) @map("criado_em") @db.Timestamp()
   updatedAt     DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
 
-  @@map("reply")
+  @@map("replies")
 }

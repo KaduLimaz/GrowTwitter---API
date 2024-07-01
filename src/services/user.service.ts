@@ -16,28 +16,35 @@ export class UserService {
 		};
 	}
 
-	async createUser(UserNew: CreateUserType): Promise<ResponseType> {
+	async createUser(UserType: CreateUserType): Promise<ResponseType> {
 		const newUser = new User(
-			UserNew.email,
-			UserNew.name,
-			UserNew.username,
-			UserNew.password
+			UserType.name,
+			UserType.email,
+			UserType.password,
+			UserType.username
 		);
+        try {
+            const createUser = await prismaConnection.user.create({
+                data: {
+                    name: newUser.name,
+                    email: newUser.email,
+                    password: newUser.password,
+                    username: newUser.username				
+                },
+            });
 
-		const createUser = await prismaConnection.user.create({
-			data: {
-				email: UserNew.email,
-				name: UserNew.name,
-				username: UserNew.username,
-				password: UserNew.password,
-			},
-		});
-
-		return {
-			success: true,
-			code: 201,
-			message: "Usuário criado com sucesso.",
-		};
+            return {
+                success: true,
+                code: 201,
+                message: "Usuário criado com sucesso.",
+            };
+        }catch (err) {
+            return {
+                success: false,
+                code: 500,
+                message: `Erro ao criar usuário.`,
+           }
+		}
 	}
 
 	// async getUsers(req: Request, res: Response) {
