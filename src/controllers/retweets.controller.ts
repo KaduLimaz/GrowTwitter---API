@@ -98,3 +98,5 @@ export class RetweetController {
     }
   }
 }
+
+export default new RetweetController();

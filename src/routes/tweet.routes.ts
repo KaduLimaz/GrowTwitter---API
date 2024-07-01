@@ -1,17 +1,20 @@
-// import { Router } from "express";
-// import LikeController from "../controllers/likeController"
+import { Router } from "express";
+import TweetController from "../controllers/tweetController"
 
-// export class UsersRoutes {
-// 	public static execute() {
-// 		const router = Router();
+export class userRoutes {
+	public static execute() {
+		const router = Router();
+		
 
-// 		//Rotas de User
-// 		router.post("/", LikeController.createLike);
-// 		router.get("/", LikeController.getLikes);
-// 		router.get("/:id",LikeController.getLikeById);
-// 		router.put("/", LikeController.);
-// 		router.delete("/",LikeController.);
+		//Rotas de Tweet
+		router.post("/tweets", TweetController.createTweet);
+		router.get("/tweets", TweetController.getTweets);
+		router.get("/:id",TweetController.getTweetById);
+		router.put("/tweets/:id/:userId", TweetController.updateTweet);
+		router.delete("/tweets/:id/:userId",TweetController.deleteTweet);
 
-// 		return router;
-// 	}
-// }
+		return router;
+	}
+}
+
+

@@ -1,81 +1,65 @@
 import { Request, Response } from "express";
-import { prismaConnection } from "../database/prisma.connection";
+import { LikeService } from "../services/like.service"
+import {CreateLikesType} from "../types/likes.type"
+
+const likeService = new LikeService();
 
 export class LikeController {
-    async createLike(req: Request, res: Response) {
-      const { usernameUser, tweetId } = req.body;
-      try {
-        const like = await prismaConnection.like.create({
-          data: {
-            usernameUser,
-            tweetId,
-          },
+
+  public async CreateLike(request: Request, response: Response) {
+    try {
+      const { userId, tweetId } = request.params;
+
+      if (!userId || !tweetId) {
+        return response.status(400).json({
+          success: false,
+          code: 400,
+          message: "Preencha todos os campos obrigatórios.",
         });
-        res.status(201).json(like);
-      } catch (err) {
-        return res.status(500).json({
-            ok: false,
-            message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
-                (err as Error).message
-            }`,
-        });
+      }
+
+      const like: CreateLikesType = { userId, tweetId };
+
+      const result = await likeService.create(like);
+      return response.status(200).json(result);
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        code: 500,
+        message: "Erro ao criar usuário.",
+      });
     }
+  }
+  public async ListLikes(request: Request, response: Response) {
+    try {
+      const { id, userId, tweetId } = request.params;
+
+      const result = await likeService.findById(id, userId, tweetId);
+
+      return response.status(200).json(result);
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        code: 500,
+        message: "Erro ao buscar like.",
+      });
     }
-  
-    async getLikes(req: Request, res: Response) {
-      try {
-        const likes = await prismaConnection.like.findMany();
-        res.status(200).json(likes);
-      } catch (err) {
-        return res.status(500).json({
-            ok: false,
-            message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
-                (err as Error).message
-            }`,
-        });
+  }
+  public async deleteLike(request: Request, response: Response) {
+    try {
+      const { id, userId, tweetId } = request.params;
+
+      const result = await likeService.delete(id, userId, tweetId);
+
+      response.status(200).json(result);
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        code: 500,
+        message: "Erro ao remover like.",
+      });
     }
-    }
-  
-    async getLikeById(req: Request, res: Response) {
-      const { id } = req.params;
-      try {
-        const like = await prismaConnection.like.findUnique({
-          where: {
-            id,
-          },
-        });
-        if (!like) {
-          return res.status(404).json({ error: 'Like not found' });
-        }
-        res.status(200).json(like);
-      } catch (err) {
-        return res.status(500).json({
-            ok: false,
-            message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
-                (err as Error).message
-            }`,
-        });
-    }
-    }
-  
-    async deleteLike(req: Request, res: Response) {
-      const { id } = req.params;
-      try {
-        await prismaConnection.like.delete({
-          where: {
-            id,
-          },
-        });
-        res.status(204).end();
-      } catch (err) {
-        return res.status(500).json({
-            ok: false,
-            message: `Ocorreu um erro inesperado. Erro: ${(err as Error).name} - ${
-                (err as Error).message
-            }`,
-        });
-    }
-    }
+  }
 }
-  
+
 export default new LikeController();

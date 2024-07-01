@@ -2,7 +2,7 @@ import { prismaConnection } from "../database/prisma.connection";
 import { ResponseType } from "../types/response.type";
 import { CreateUserType, UpdateUserType } from "../types/users.type";
 import { User } from "../models/user.model";
-import { error } from "console";
+
 
 export class UserService {
 	async findAll(): Promise<ResponseType> {

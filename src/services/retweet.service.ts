@@ -1,7 +1,5 @@
 import { prismaConnection } from "../database/prisma.connection";
 import { ResponseType } from "../types/response.type";
-import { CreateTweetType, UpdateTweetType } from "../types/tweets.type";
-import { Tweet } from "../models/tweet.model";
 import { Retweet } from "../models/retweet.model";
 import { CreateRetweetType, UpdateRetweetType } from "../types/retweets.type";
 

@@ -21,7 +21,7 @@ export class TweetService {
 		const createdTweet = await prismaConnection.tweet.create({
 			data: {
 				content: tweet.content,
-				type: "Tweet",
+				type: "TWEET",
 				userId: tweet.userId,
 			},
 		});
@@ -66,7 +66,7 @@ export class TweetService {
 			},
 			data: {
 				content: tweetUpdate.content,
-				type: "Tweet",
+				type: "TWEET",
 			},
 		});
 
